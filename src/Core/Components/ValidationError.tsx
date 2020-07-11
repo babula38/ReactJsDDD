@@ -5,12 +5,11 @@ interface Props {
 }
 
 export default function ValidationErrorMessage({ Message }: Props): ReactElement | null {
-    const isInvalid = Message != '' || Message != undefined
-    if (!isInvalid)
-        return null;
+    const isInvalid = Message != '' || Message != undefined || Message != null
+
     return (
-        <div>
+        <span>
             {Message}
-        </div>
+        </span>
     )
 }

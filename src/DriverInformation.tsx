@@ -1,6 +1,8 @@
-import React, { Component } from 'react'
+import React, { Component, MouseEvent } from 'react'
 import { DriverInformationService } from './ApplicationServices/DriverInformationService';
-import InputText from './InputText';
+
+import ValidationErrorMessage from './Core/Components/ValidationError';
+import TextBox from './Core/Components/TextBox';
 
 interface State {
     Name: string;
@@ -9,28 +11,35 @@ interface State {
 
 export default class DriverInformation extends Component<{}, State> {
     state: State = {
-        Name: "",
+        Name: '',
         Error: ValidationError.Init(),
     };
 
     render() {
         return (
             <div>
-                <InputText error={this.state.Error.NameInValidErrorMessage}
-                    onChange={(e) => this.setState({ Name: e })}></InputText>
-                <button onClick={() => {
-                    const driverInform = new DriverInformationEntity(this.state);
-                    if (driverInform.IsValid()) {
-                        this.setState({
-                            Error: {
-                                IsNameValid: true,
-                                NameInValidErrorMessage: "f"
-                            }
-                        });
-                    }
-                    const information = new DriverInformationService();
-                    information.Save("");
-                }}>Submit</button>
+                <form>
+                    <fieldset>Driver information</fieldset>
+
+                    <TextBox error={this.state.Error.NameInValidErrorMessage}
+                        onChange={(e: string) => this.setState({ Name: e })}></TextBox>
+
+                    <ValidationErrorMessage Message={this.state.Error.NameInValidErrorMessage} />
+
+                    <button onClick={(e) => {
+                        e.preventDefault();
+                        const driverInform = new DriverInformationEntity(this.state);
+                        if (!driverInform.IsValid()) {
+                            this.setState({
+                                Error: driverInform.ValidationError
+                            });
+                        }
+                        else {
+                            const information = new DriverInformationService();
+                            information.Save("");
+                        }
+                    }}>Submit</button>
+                </form>
             </div >
         )
     }
@@ -38,11 +47,16 @@ export default class DriverInformation extends Component<{}, State> {
 
 class DriverInformationEntity {
     Name: string;
+
+    public get ValidationError(): ValidationError {
+        return ValidationError.Init();
+    }
+
     constructor({ Name }: { Name: string }) {
         this.Name = Name;
     }
     public IsValid(): boolean {
-        return this.Name != "" || this.Name != undefined;
+        return this.Name != '';
     }
 }
 
